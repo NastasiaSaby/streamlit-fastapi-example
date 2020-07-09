@@ -6,7 +6,7 @@ COPY requirements.txt /fastapi
 
 WORKDIR /fastapi
 
-RUN pip install -r requirements.txt -f https://download.pytorch.org/whl/torch_stable.html
+RUN pip install -r requirements.txt
 
 COPY . /fastapi
 

@@ -1,41 +1,35 @@
 import streamlit as st
-from requests_toolbelt.multipart.encoder import MultipartEncoder
 import requests
-from PIL import Image
-import io
 
-st.title('DeepLabV3 image segmentation')
+st.title('Form example: What is your favourite film?')
 
 # fastapi endpoint
 url = 'http://fastapi:8000'
-endpoint = '/segmentation'
+endpoint = '/postfilm'
 
-st.write('''Obtain semantic segmentation maps of the image in input via DeepLabV3 implemented in PyTorch.
-         This streamlit example uses a FastAPI service as backend.
-         Visit this URL at `:8000/docs` for FastAPI documentation.''')  # description and instructions
+option = st.selectbox(
+     'How would you like to be contacted to speak more about your favourite film?',
+    ('Email', 'Home phone', 'Mobile phone'))
 
-image = st.file_uploader('insert image')  # image upload widget
+title = st.text_input('Film title', 'Life of Brian')
 
 
-def process(image, server_url: str):
+def process(title, option, server_url: str):
 
-    m = MultipartEncoder(
-        fields={'file': ('filename', image, 'image/jpeg')}
-        )
-
-    r = requests.post(server_url,
-                      data=m,
-                      headers={'Content-Type': m.content_type},
-                      timeout=8000)
+    r = requests.post(server_url, json={"title": title, "option": option})
 
     return r
 
 
-if st.button('Get segmentation map'):
+if st.button('Submit'):
 
-    if image is None:
-        st.write("Insert an image!")  # handle case with no image
+    if title == None or title == "":
+        st.write("Insert a title!")  # handle case with no image
     else:
-        segments = process(image, url+endpoint)
-        segmented_image = Image.open(io.BytesIO(segments.content)).convert('RGB')
-        st.image([image, segmented_image], width=300)  # output dyptich
+        result = process(title, option, url + endpoint)
+        if (result.status_code == 200):
+            st.write(result)
+            jsonDecoded = result.json()
+            st.write("Your favourite film is " + jsonDecoded["YourTitle"])
+            st.write("You would like to be contacted by " + jsonDecoded["YourOption"])
+

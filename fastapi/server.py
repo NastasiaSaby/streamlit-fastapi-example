@@ -1,21 +1,15 @@
-from fastapi import FastAPI, File
-import tempfile
-from starlette.responses import FileResponse
-from segmentation import get_segmentator, get_segments
+from fastapi import FastAPI
+from pydantic import BaseModel
 
-model = get_segmentator()
+app = FastAPI()
 
-app = FastAPI(title="DeepLabV3 image segmentation",
-              description='''Obtain semantic segmentation maps of the image in input via DeepLabV3 implemented in PyTorch.
-                           Visit this URL at port 8501 for the streamlit interface.''',
-              version="0.1.0",
-              )
+class FilmPost(BaseModel):
+    title: str
+    option: str
 
-
-@app.post("/segmentation")
-def get_segmentation_map(file: bytes = File(...)):
-    '''Get segmentation maps from image file'''
-    segmented_image = get_segments(model, file)
-    with tempfile.NamedTemporaryFile(mode="w+b", suffix=".png", delete=False) as outfile:
-        segmented_image.save(outfile)
-        return FileResponse(outfile.name, media_type="image/png")
+@app.post("/postfilm/")
+async def new_film(item: FilmPost):
+    return {
+        "YourTitle": item.title,
+        "YourOption": item.option
+    }

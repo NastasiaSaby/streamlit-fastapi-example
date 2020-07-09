@@ -1,10 +1,10 @@
-# streamlit-fastapi-model-serving
+# An example of streamlit and FastAPI
 
-Simple example of usage of streamlit and FastAPI for ML model serving described on https://davidefiocco.github.io/2020/06/27/streamlit-fastapi-ml-serving.html.
+Inspired by the project "streamlit-fastapi-model-serving", this is another example of usage of **streamlit** and **FastAPI**.
 
 When developing simple APIs that serve machine learning models, it can be useful to have _both_ a backend (with API documentation) for other applications to call and a frontend for users to experiment with the functionality.
 
-In this example, we serve an [image semantic segmentation model](https://pytorch.org/hub/pytorch_vision_deeplabv3_resnet101/) using `FastAPI` for the backend service and `streamlit` for the frontend service. `docker-compose` orchestrates the two services and allows communication between them.
+In this example, you will find a form asking for your favourite film and the way you want to be contacted to speak more about your favourite film. The form is built with *streamlit* and calls *fastapi* when submitting to get an answer.
 
 To run the example in a machine running Docker and docker-compose, run:
 
