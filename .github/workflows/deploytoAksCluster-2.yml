@@ -1,0 +1,50 @@
+on: [push]
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    
+    - uses: azure/docker-login@v1
+      with:
+        login-server: nastasia.azurecr.io
+        username: ${{ secrets.acr_nastasia_username }}
+        password: ${{ secrets.acr_nastasia_password }}
+    
+    - name: Build and push image to ACR
+      id: build-image
+      run: |
+        docker build "$GITHUB_WORKSPACE/fastapi" -f  "fastapi/Dockerfile" -t nastasia.azurecr.io/nastasia2:${{ github.sha }}
+        docker push nastasia.azurecr.io/nastasia2:${{ github.sha }}
+    
+    - uses: azure/k8s-set-context@v1
+      with:
+         kubeconfig: ${{ secrets.aks_nastasia2_kubeConfig }}
+      id: login
+    
+    - name: Create namespace
+      run: |
+        namespacePresent=`kubectl get namespace | grep nastasia23f78 | wc -l`
+        if [ $namespacePresent -eq 0 ]
+        then
+            echo `kubectl create namespace nastasia23f78`
+        fi
+
+    - uses: azure/k8s-create-secret@v1
+      with:
+        namespace: nastasia23f78
+        container-registry-url: nastasia.azurecr.io
+        container-registry-username: ${{ secrets.acr_nastasia_username }}
+        container-registry-password: ${{ secrets.acr_nastasia_password }}
+        secret-name: nastasia2dockerauth
+       
+    - uses: azure/k8s-deploy@v1
+      with:
+        namespace: nastasia23f78
+        manifests: |
+          manifests/deployment-2.yml
+          manifests/service-2.yml
+        images: |
+          nastasia.azurecr.io/nastasia2:${{ github.sha }}
+        imagepullsecrets: |
+          nastasia2dockerauth
