@@ -1,0 +1,16 @@
+apiVersion : apps/v1beta1
+kind: Deployment
+metadata:
+  name: "nas-7ff4"
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: "nas-7ff4"
+    spec:
+      containers:
+        - name: "nas-7ff4"
+          image: "nastasia.azurecr.io/nas"
+          ports:
+          - containerPort: 8000
